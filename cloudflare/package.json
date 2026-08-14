@@ -1,0 +1,19 @@
+{
+  "name": "lifepass-documenso-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "secret:bulk": "wrangler secret bulk",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "^0.3.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260424.1",
+    "typescript": "^5.8.2",
+    "wrangler": "4.85.0"
+  }
+}

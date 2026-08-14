@@ -1,0 +1,45 @@
+#:schema node_modules/wrangler/config-schema.json
+#
+# LifePass Documenso on Cloudflare Containers.
+# Image: public Docker Hub documenso/documenso (no local Docker build required).
+# Secrets: set via `pnpm secret:bulk` from a gitignored env file (see README).
+
+name = "lifepass-documenso"
+main = "src/index.ts"
+compatibility_date = "2026-06-08"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Overwritten after first deploy once the workers.dev URL is known.
+NEXT_PUBLIC_WEBAPP_URL = "https://lifepass-documenso.lifepass.workers.dev"
+NEXT_PRIVATE_INTERNAL_WEBAPP_URL = "https://lifepass-documenso.lifepass.workers.dev"
+NEXT_PUBLIC_UPLOAD_TRANSPORT = "database"
+NEXT_PRIVATE_SMTP_TRANSPORT = "smtp-auth"
+NEXT_PRIVATE_SMTP_HOST = "smtp.mandrillapp.com"
+NEXT_PRIVATE_SMTP_PORT = "587"
+NEXT_PRIVATE_SMTP_FROM_NAME = "LifePass Signing"
+NEXT_PRIVATE_SMTP_FROM_ADDRESS = "noreply@lifepass.me"
+NEXT_PRIVATE_SIGNING_TRANSPORT = "local"
+PORT = "3000"
+
+[[containers]]
+class_name = "DocumensoContainer"
+image = "docker.io/documenso/documenso:v2.15.0"
+max_instances = 2
+instance_type = "standard-1"
+
+[[durable_objects.bindings]]
+name = "DOCUMENSO"
+class_name = "DocumensoContainer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DocumensoContainer"]
+
+[observability.logs]
+enabled = true
+
+[triggers]
+# Keep the signing container warm: without this it sleeps after 2h idle and
+# the next signer waits out a full cold boot (up to 180s).
+crons = ["*/5 * * * *"]
