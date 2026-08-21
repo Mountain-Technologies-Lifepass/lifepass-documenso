@@ -57,8 +57,8 @@ function buildDocumensoEnvVars(workerEnv: WorkerEnv): Record<string, string> {
  */
 export class DocumensoContainer extends Container {
   defaultPort = 3000;
-  /** Keep the signing host warm between onboarding sessions. */
-  sleepAfter = "2h";
+  /** Keep short signing sessions warm without pinning the database online. */
+  sleepAfter = "15m";
   enableInternet = true;
 
   /**
@@ -109,8 +109,7 @@ export default {
     const container = getContainer(workerEnv.DOCUMENSO, "primary");
 
     // Ops-only: force the container to restart so it picks up new Worker
-    // secrets (env is injected at container start, and the keep-warm cron
-    // otherwise keeps an old instance alive indefinitely).
+    // secrets, which are injected when the container starts.
     const url = new URL(request.url);
     if (url.pathname === "/__ops/restart") {
       const token = request.headers.get("x-ops-restart-token");
@@ -122,22 +121,5 @@ export default {
     }
 
     return container.fetch(request);
-  },
-
-  /**
-   * Keep-warm ping (see [triggers] crons). Signing traffic is sporadic, so
-   * without this the container sleeps and the next signer pays the cold boot.
-   */
-  async scheduled(
-    _controller: ScheduledController,
-    workerEnv: WorkerEnv,
-  ): Promise<void> {
-    const container = getContainer(workerEnv.DOCUMENSO, "primary");
-    const response = await container.fetch(
-      new Request(`${workerEnv.NEXT_PUBLIC_WEBAPP_URL ?? "https://lifepass-documenso.lifepass.workers.dev"}/api/health`),
-    );
-    if (!response.ok) {
-      console.warn(`[keep-warm] health ping returned ${response.status}`);
-    }
   },
 };

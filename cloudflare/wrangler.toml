@@ -38,8 +38,3 @@ new_sqlite_classes = ["DocumensoContainer"]
 
 [observability.logs]
 enabled = true
-
-[triggers]
-# Keep the signing container warm: without this it sleeps after 2h idle and
-# the next signer waits out a full cold boot (up to 180s).
-crons = ["*/5 * * * *"]
