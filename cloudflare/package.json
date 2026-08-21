@@ -6,7 +6,8 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "secret:bulk": "wrangler secret bulk",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "test:autosuspend": "node --test neon-autosuspend-config.test.mjs"
   },
   "dependencies": {
     "@cloudflare/containers": "^0.3.7"

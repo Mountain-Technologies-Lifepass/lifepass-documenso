@@ -28,3 +28,10 @@ Required secrets (plus vars already in `wrangler.toml`):
 5. Set `NEXT_PUBLIC_WEBAPP_URL` / `NEXT_PRIVATE_INTERNAL_WEBAPP_URL` to the real `*.workers.dev` (or custom) URL and redeploy.
 6. Open the URL, create the admin user, API token, and webhook → LifePass API `/api/b2b/signing/documenso/webhook`.
 7. Wire monorepo `DOCUMENSO_API_URL`, `DOCUMENSO_API_TOKEN`, `DOCUMENSO_WEBHOOK_SECRET`.
+
+## Idle behavior
+
+The container sleeps after 15 minutes without a request. There is no keep-warm
+cron, so the dedicated Neon endpoint can autosuspend after the container closes
+its database connections. The first signing request after a long idle period
+may wait for the container cold start.
